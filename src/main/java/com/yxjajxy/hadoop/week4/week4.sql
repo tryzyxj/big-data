@@ -56,3 +56,22 @@ from (
          having total > 50
          order by avgrate desc limit 10
 ) res left join t_movie m on (res.MovieID = m.MovieID);
+
+-- 题目三：找出影评次数最多的女士所给出最高分的 10 部电影的平均影评分，展示电影名和平均影评分
+select m.MovieName, r.avgrate
+from (
+         select m.MovieID, avg(r.Rate) as avgrate
+         from (
+                  select r.MovieID, r.Rate as seq
+                  from (
+                           select r.UserID
+                           from t_rating r left join t_user u on (r.UserID = u.UserID)
+                           where u.Sex = 'F'
+                           group by r.UserID
+                           order by count(*) desc limit 1
+                       ) u1 left join t_rating r on (u1.UserID = r.UserID)
+                  order by r.Rate desc limit 10
+         ) m left join t_rating r on (m.MovieID = r.MovieID)
+         group by m.MovieID
+         order by avg(m.seq) desc
+) r left join t_movie m on (r.MovieID = m.MovieID);
